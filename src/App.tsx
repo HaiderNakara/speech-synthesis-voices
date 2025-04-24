@@ -29,11 +29,18 @@ export default function VoiceSelector() {
   const [script, setScript] = useState("Hello, how are you?");
   const [isScriptDialogOpen, setIsScriptDialogOpen] = useState(false);
   const [newScript, setNewScript] = useState(script);
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
+  const [voiceSettings, setVoiceSettings] = useState({
+    rate: 1,
+    pitch: 1,
+  });
 
   // Play sample audio for a voice
   const playSample = (voiceName: string) => {
     const utterance = new SpeechSynthesisUtterance(script);
     utterance.voice = voices.find((v) => v.name === voiceName) || null;
+    utterance.rate = voiceSettings.rate;
+    utterance.pitch = voiceSettings.pitch;
     window.speechSynthesis.speak(utterance);
     setPlayingVoice(voiceName);
 
@@ -83,14 +90,23 @@ export default function VoiceSelector() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Voice Selector</h1>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsScriptDialogOpen(true)}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Change Script
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSettingsDialogOpen(true)}
+            >
+              Voice Settings
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsScriptDialogOpen(true)}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Change Script
+            </Button>
+          </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
@@ -196,6 +212,74 @@ export default function VoiceSelector() {
               Cancel
             </Button>
             <Button onClick={handleScriptChange}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isSettingsDialogOpen}
+        onOpenChange={setIsSettingsDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Voice Settings</DialogTitle>
+            <DialogDescription>
+              Adjust the rate and pitch of the voice.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Rate</label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="range"
+                  min="0.5"
+                  max="2"
+                  step="0.1"
+                  value={voiceSettings.rate}
+                  onChange={(e) =>
+                    setVoiceSettings((prev) => ({
+                      ...prev,
+                      rate: parseFloat(e.target.value),
+                    }))
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground">
+                  {voiceSettings.rate.toFixed(1)}x
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Pitch</label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="range"
+                  min="0.5"
+                  max="2"
+                  step="0.1"
+                  value={voiceSettings.pitch}
+                  onChange={(e) =>
+                    setVoiceSettings((prev) => ({
+                      ...prev,
+                      pitch: parseFloat(e.target.value),
+                    }))
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground">
+                  {voiceSettings.pitch.toFixed(1)}x
+                </span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsSettingsDialogOpen(false)}
+            >
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
